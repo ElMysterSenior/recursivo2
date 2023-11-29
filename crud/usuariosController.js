@@ -68,13 +68,13 @@ exports.crearUsuario = (req, res) => {
 };
 
 
-// Eliminar un usuario por ID
-exports.eliminarUsuario = (req, res) => {
-    const userId = req.params.id;
+// Eliminar un usuario por nombre de usuario
+exports.eliminarUsuarioPorNombreUsuario = (req, res) => {
+    const nombreUsuario = req.params.nombreUsuario;
 
-    db.query('DELETE FROM Usuarios WHERE ID = ?', [userId], (err, result) => {
+    db.query('DELETE FROM Usuarios WHERE nombreUsuario = ?', [nombreUsuario], (err, result) => {
         if (err) {
-            console.error('Error al eliminar usuario por ID:', err);
+            console.error('Error al eliminar usuario por nombre de usuario:', err);
             res.status(500).json({ message: 'Error interno del servidor' });
         } else if (result.affectedRows === 0) {
             res.status(404).json({ message: 'Usuario no encontrado' });
@@ -83,6 +83,7 @@ exports.eliminarUsuario = (req, res) => {
         }
     });
 };
+
 
 // Actualizar un usuario por ID
 exports.actualizarUsuario = (req, res) => {
@@ -117,3 +118,39 @@ exports.actualizarUsuario = (req, res) => {
     );
 };
 
+
+exports.actualizarUsuarioAdmin = (req, res) => {
+    const userId = req.params.id;
+  
+    // Asegúrate de que estos campos coincidan con tu modelo de usuario y base de datos
+    const camposEditables = {
+      nombreUsuario: req.body.nombreUsuario,
+      claveUsuario: req.body.claveUsuario,
+      nombreCompleto: req.body.nombreCompleto,
+      tipoUsuario: req.body.tipoUsuario
+      // Agrega otros campos editables según tu modelo de usuario
+    };
+  
+    // Elimina campos indefinidos o nulos
+    Object.keys(camposEditables).forEach(key => {
+      if (camposEditables[key] === undefined || camposEditables[key] === null) {
+        delete camposEditables[key];
+      }
+    });
+  
+    db.query(
+      'UPDATE Usuarios SET ? WHERE ID = ?',
+      [camposEditables, userId],
+      (err, result) => {
+        if (err) {
+          console.error('Error al actualizar usuario por ID:', err);
+          res.status(500).json({ message: 'Error interno del servidor' });
+        } else if (result.affectedRows === 0) {
+          res.status(404).json({ message: 'Usuario no encontrado' });
+        } else {
+          res.json({ message: 'Usuario actualizado correctamente' });
+        }
+      }
+    );
+  };
+  
